@@ -44,44 +44,12 @@ public class Util {
 //		// The interval (6, 2) using the notation above means; pred = 6 and node = 2
 //		// if id = 4, then (6 < 4 <= 2) = false
 //		// if id = 9, then (6 < 9 <= 2) = true
-//
-//		// Task: given an identifier, id: check whether pred < id <= node
-//		if(upper.compareTo(lower) < 0) {
-//			return lower.compareTo(id) <= 0 || id.compareTo(upper) <= 0;
-//		}
-//		return lower.compareTo(id) <= 0 && id.compareTo(upper) <= 0;
 
 
-	        // a formula to check whether an id falls within the set {lower, upper} using
-	        // the address size as our bound (modulos operation)
-	        // it modifies 'upper' and 'id' when lower > upper e.g. set (6, 2) in mod 10 =
-	        // {6, 7, 8, 9, 0, 1, 2}
-
-	        // implement: read the descriptions above
-
-	        BigInteger addressSize = Hash.addressSize();
-
-	        BigInteger idMod = id.mod(addressSize);
-
-	        BigInteger lowerMod = lower.mod(addressSize);
-
-	        BigInteger upperMod = upper.mod(addressSize);
-
-	        if (lowerMod.compareTo(upperMod) > 0) { // lower > upper
-	            // lower <= id <= upper blir til:
-	            // lower <= id < asize || 0 <= id <= upper blir til
-	            // (lower <= id && id < asize) || (0 <= id && id <= upper)
-	            return (lowerMod.compareTo(idMod) <= 0 && idMod.compareTo(addressSize) < 0)
-	                    || (BigInteger.valueOf(0).compareTo(idMod) <= 0 && idMod.compareTo(upperMod) <= 0);
-	        }
-	        else if (lowerMod.compareTo(upperMod) < 0) {
-	            // Sjekker om lower <= id <= upper blir til
-	            // lower <= id && id <= upper
-	            return lowerMod.compareTo(idMod) <= 0 && idMod.compareTo(upperMod) <= 0;
-	        }
-	        else {
-	            return lowerMod.compareTo(idMod) == 0;
-	        }
+		if(upper.compareTo(lower) < 0) {
+			return lower.compareTo(id) <= 0 || id.compareTo(upper) <= 0;
+		}
+		return lower.compareTo(id) <= 0 && id.compareTo(upper) <= 0;
 	}
 
 	public static List<String> toString(List<NodeInterface> list) throws RemoteException {
