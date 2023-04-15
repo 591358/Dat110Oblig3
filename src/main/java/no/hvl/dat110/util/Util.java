@@ -11,6 +11,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,10 +23,10 @@ import no.hvl.dat110.middleware.Node;
 import no.hvl.dat110.rpc.interfaces.NodeInterface;
 
 public class Util {
-	 
+
 	public static String activeIP = null;
-	public static int numReplicas = 4;  
-	
+	public static int numReplicas = 4;
+
 	/**
 	 * This method computes (lower <= id <= upper).
 	 * To use this method to compute (lower < id <= upper), ensure that the calling method increased the lower param by 1.
@@ -35,61 +36,95 @@ public class Util {
 	 * @param lower
 	 * @param upper
 	 * @return true if (lower <= id <= upper) or false otherwise
+	 * @throws NoSuchAlgorithmException 
 	 */
-	public static boolean checkInterval(BigInteger id, BigInteger lower, BigInteger upper) {
-		// Hint:
-		// using mod = 10, then the interval (6, 2) = (6, 7, 8, 9, 0, 1, 2)
-		// The interval (6, 2) using the notation above means; pred = 6 and node = 2
-		// if id = 4, then (6 < 4 <= 2) = false  
-		// if id = 9, then (6 < 9 <= 2) = true
-		
-		// Task: given an identifier, id: check whether pred < id <= node
-		
-		return false;
+	public static boolean checkInterval(BigInteger id, BigInteger lower, BigInteger upper) throws NoSuchAlgorithmException {
+//		// Hint:
+//		// using mod = 10, then the interval (6, 2) = (6, 7, 8, 9, 0, 1, 2)
+//		// The interval (6, 2) using the notation above means; pred = 6 and node = 2
+//		// if id = 4, then (6 < 4 <= 2) = false
+//		// if id = 9, then (6 < 9 <= 2) = true
+//
+//		// Task: given an identifier, id: check whether pred < id <= node
+//		if(upper.compareTo(lower) < 0) {
+//			return lower.compareTo(id) <= 0 || id.compareTo(upper) <= 0;
+//		}
+//		return lower.compareTo(id) <= 0 && id.compareTo(upper) <= 0;
 
+
+	        // a formula to check whether an id falls within the set {lower, upper} using
+	        // the address size as our bound (modulos operation)
+	        // it modifies 'upper' and 'id' when lower > upper e.g. set (6, 2) in mod 10 =
+	        // {6, 7, 8, 9, 0, 1, 2}
+
+	        // implement: read the descriptions above
+
+	        BigInteger addressSize = Hash.addressSize();
+
+	        BigInteger idMod = id.mod(addressSize);
+
+	        BigInteger lowerMod = lower.mod(addressSize);
+
+	        BigInteger upperMod = upper.mod(addressSize);
+
+	        if (lowerMod.compareTo(upperMod) > 0) { // lower > upper
+	            // lower <= id <= upper blir til:
+	            // lower <= id < asize || 0 <= id <= upper blir til
+	            // (lower <= id && id < asize) || (0 <= id && id <= upper)
+	            return (lowerMod.compareTo(idMod) <= 0 && idMod.compareTo(addressSize) < 0)
+	                    || (BigInteger.valueOf(0).compareTo(idMod) <= 0 && idMod.compareTo(upperMod) <= 0);
+	        }
+	        else if (lowerMod.compareTo(upperMod) < 0) {
+	            // Sjekker om lower <= id <= upper blir til
+	            // lower <= id && id <= upper
+	            return lowerMod.compareTo(idMod) <= 0 && idMod.compareTo(upperMod) <= 0;
+	        }
+	        else {
+	            return lowerMod.compareTo(idMod) == 0;
+	        }
 	}
-	
+
 	public static List<String> toString(List<NodeInterface> list) throws RemoteException {
-		List<String> nodestr = new ArrayList<String>();
-		list.forEach(node -> 
+		List<String> nodestr = new ArrayList<>();
+		list.forEach(node ->
 			{
 				nodestr.add(((Node)node).getNodeName());
 			}
 		);
-		
+
 		return nodestr;
 	}
-	
+
 	public static NodeInterface getProcessStub(String name, int port) {
-		
+
 		NodeInterface nodestub = null;
 		Registry registry = null;
 		try {
 			// Get the registry for this worker node
-			registry = LocateRegistry.getRegistry(port);		
-			
+			registry = LocateRegistry.getRegistry(port);
+
 			nodestub = (NodeInterface) registry.lookup(name);	// remote stub
-			
+
 		} catch (NotBoundException | RemoteException e) {
 			return null;			// if this call fails, then treat the node to have left the ring...or unavailable
 		}
-		
+
 		return nodestub;
 	}
-	
+
 	/**
 	 * This method is used when processes are running on a single computer
 	 * @return the registry for the found ip
-	 * @throws RemoteException 
-	 * @throws NumberFormatException 
+	 * @throws RemoteException
+	 * @throws NumberFormatException
 	 */
 	public static Registry tryIPSingleMachine(String nodeip) throws NumberFormatException, RemoteException {
-		
+
 		// try the tracker IP addresses and connect to any one available
 		String[] ips = StaticTracker.ACTIVENODES;
 		List<String> iplist = Arrays.asList(ips);
 		Collections.shuffle(iplist);
-		
+
 		Registry registry = null;
 		for (String ip : iplist) {
 			String ipaddress = ip.split(":")[0].trim();
@@ -103,20 +138,20 @@ public class Util {
 				return registry;
 			}
 		}
-		
+
 		return registry;
 
 	}
-	
+
 	public static Map<String, Integer> getProcesses(){
-		
+
 		Map<String, Integer> processes = new HashMap<>();
 		processes.put("process1", 9091);
 		processes.put("process2", 9092);
 		processes.put("process3", 9093);
 		processes.put("process4", 9094);
 		processes.put("process5", 9095);
-		
+
 		return processes;
 	}
 

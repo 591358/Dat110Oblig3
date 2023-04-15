@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package no.hvl.dat110.gui;
 
@@ -16,8 +16,8 @@ public class FileDataStructure {
 	private BigInteger hash;
 	private byte[] bytesOfFile;
 	private String size;
-	
-	/** 
+
+	/**
 	 * @return the filename
 	 */
 	public String getFilename() {
@@ -43,7 +43,7 @@ public class FileDataStructure {
 	}
 	/**
 	 * @return the bytesOfFile
-	 */ 
+	 */
 	public byte[] getBytesOfFile() {
 		return bytesOfFile;
 	}
@@ -77,5 +77,5 @@ public class FileDataStructure {
 	public void setIpaddress(String ipaddress) {
 		this.ipaddress = ipaddress;
 	}
-	
+
 }

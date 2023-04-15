@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -27,29 +28,29 @@ import no.hvl.dat110.middleware.Message;
 import no.hvl.dat110.util.FileManager;
 
 /**
- * 
+ *
  * @author tdoy
  *
  */
 public class FilesListing extends JFrame implements PropertyChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private JPanel contentPane;
 	private JList<String> list;
 	private DefaultListModel<String> dlmodel;
-	
+
 	private FileManager filemanager;
-	 
+
 	private JTable table;
 
-	private int counter = 0;  
-	
+	private int counter = 0;
+
 	/**
 	 * Create the frame.
 	 */
 	public FilesListing(FileManager fm, JTable table) {
-		
+
 		this.filemanager = fm;
 		this.table = table;
 
@@ -58,61 +59,61 @@ public class FilesListing extends JFrame implements PropertyChangeListener {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
-		
+
 		// add list components
 		dlmodel = new DefaultListModel<>();
 		list = new JList<>(dlmodel);
 		JScrollPane sp = new JScrollPane(list);
-        
+
         // add listener to list that can bring up popup menus.
         JPopupMenu popup = createPopupMenu();
         MouseListener popupListener = new PopupListener(popup);
         list.addMouseListener(popupListener);
-        
+
         contentPane.add(sp);
         setLocationRelativeTo(null);    		// center on screen
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);					// disable resizing of form
 	}
-	
+
 	private JPopupMenu createPopupMenu() {
-		
+
 		JPopupMenu popup = new JPopupMenu();
 		JMenuItem jmSearch = new JMenuItem("Search");
 		jmSearch.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+
 				jmSearchActionPerformed();
 			}
-			
+
 		});
-		
+
 		popup.add(jmSearch);
-		
+
 		return popup;
-		
+
 	}
-	
+
 	public void addFileNameToList(String filename) {
 		dlmodel.addElement(filename);
 	}
-	
+
 	private void findFile(String filename) throws RemoteException {
- 
+
 		Set<Message> activepeers = filemanager.requestActiveNodesForFile(filename);
-		
-		counter = activepeers.size();		
-		
+
+		counter = activepeers.size();
+
 		// clear all rows
 		DefaultTableModel tmodel = (DefaultTableModel) table.getModel();
 		tmodel.setRowCount(0);
-		
+
 		JOptionPane.showMessageDialog(null,
                 "Search completed with "+counter+" results. See results in the table", "Message",
                 JOptionPane.INFORMATION_MESSAGE);
-		
+
 		for(Message msg : activepeers) {
 			try {
 				double size = (double) msg.getBytesOfFile().length/1000;
@@ -124,13 +125,13 @@ public class FilesListing extends JFrame implements PropertyChangeListener {
 				//
 			}
 		}
-		
+
 		this.dispose();
 
 	}
-    
+
 	private void jmSearchActionPerformed() {
-		
+
 		try {
 			String selectedfile = list.getSelectedValue();
 			findFile(selectedfile);
@@ -141,20 +142,20 @@ public class FilesListing extends JFrame implements PropertyChangeListener {
                     JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private void updateTableRows(Object[] rdata) {
-		
+
 		DefaultTableModel tmodel = (DefaultTableModel) table.getModel();
 		tmodel.addRow(rdata);
-		
+
 	}
-	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		//		 
-	} 
-	
+		//
+	}
+
 
 }
